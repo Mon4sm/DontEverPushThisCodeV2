@@ -6,8 +6,6 @@ on:
     branches: [ main ]
 
 # TODO#0: Declare workflow permissions.
-# SCOPE EXPLANATION: We scope per-workflow to follow the Principle of Least Privilege, 
-# ensuring a compromised workflow can't access parts of the repo it doesn't need.
 permissions:
   contents: read          # To check out code
   id-token: write         # TODO#0c: Required for OIDC tokens (e.g., for SonarCloud/Cloud auth)
@@ -39,7 +37,6 @@ jobs:
           extra_args: --only-verified
 
       # TODO#4: Gitleaks step with SARIF and Job Summary
-      # Q: Gitleaks (regex) has more false positives. TruffleHog (verified) misses more (unverifiable) keys.
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
         continue-on-error: true
@@ -61,8 +58,6 @@ jobs:
           fetch-depth: 0
 
       # TODO#6: SonarQube scan step
-      # Q: Findings appear in Sonar dashboard because it is a standalone platform 
-      # designed for deep code quality metrics that GitHub's Security tab doesn't native support.
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v3
         continue-on-error: true
@@ -87,12 +82,9 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           # TODO#8: Enable both security and quality suites.
-          # Difference: security-extended adds more low-severity vulns; 
-          # security-and-quality adds maintainability (clean code) rules.
           queries: security-extended,security-and-quality
 
       # TODO#9: Perform Analysis. 
-      # If two languages share a category, their results overwrite each other in the UI.
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
@@ -170,7 +162,6 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           # TODO#18: Severities to report
-          # Q: LOW/MEDIUM usually shouldn't block builds to avoid developer fatigue.
           severity: 'HIGH,CRITICAL'
           # TODO#19: Report only CVEs with a fix available
           ignore-unfixed: true
